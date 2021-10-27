@@ -137,42 +137,46 @@ Promise.all(promises).then(function(values) {
         .append("path")
         .attr('class', 'iris')
         .attr('id', d => "iris_" + d.properties.codeiris)
-        .attr("d", path)
-        // .style("fill", "teal")
-        // .on("mouseout", function(d) {
-        //     div.style("opacity", 0);
-        //     div.html("")
-        //         .style("left", "-500px")
-        //         .style("top", "-500px");
-        // });
-    function updateColors(param){
+        .attr("d", path);
 
+    function updateParametersScaling(param){
         const min = d3.min(csv, d =>  +d[param]),
         max = d3.max(csv, d =>  +d[param]);
+        
+        let legendNbCells = 20;
 
-        var quantile = d3.scaleQuantile().domain([min, max])
-            .range(colors);
+        let quantile = d3.scaleSequential().domain([min, max])
+            .interpolator(d3.interpolatePuRd);
+        // let quantile = d3.scaleQuantile().domain([min, max])
+        //     .range(colors);
 
-        var legend = svg.append('g')
+        svg.selectAll(".legendelements").remove()
+        let legend = svg.append('g')
             .attr('transform', 'translate(625, 150)')
-            .attr('id', 'legend');
+            .attr('id', 'legend')
+            .attr('class', 'legendelements');
 
+        let legendStep = (max-min)/legendNbCells
         legend.selectAll('.colorbar')
-            .data(d3.range(colors.length))
+            .data(d3.range(min, max, legendStep))
             .enter().append('svg:rect')
-                .attr('y', d => d * 20 + 'px')
+                .attr('y', d => (d-min)/legendStep * legendCellSize + 'px')
                 .attr('height', '20px')
                 .attr('width', '20px')
                 .attr('x', '0px')
                 // .attr("class", d => "q" + d + "-9")
-                .style("fill", d => colors[d]);
+                .style("fill", d => quantile(d))
+                .style("stroke-width", "0.25px")
+                .style("stroke", "rgb(0,0,0)")
+        ;
 
-        var legendScale = d3.scaleLinear()
+        let legendScale = d3.scaleLinear()
             .domain([min, max])
-            .range([0, colors.length * legendCellSize]);
+            .range([0, legendNbCells * legendCellSize]);
 
-        legendAxis = legend.append("g")
-            .attr('transform', 'translate(550, 150)')
+        legendAxis = svg.append("g")
+            .attr('class', 'legendelements')
+            .attr('transform', 'translate('+(legendCellSize+625)+', 150)')
             .call(d3.axisRight(legendScale));
 
         csv.forEach(function(e,i) {
@@ -199,7 +203,7 @@ Promise.all(promises).then(function(values) {
                 });
         });
     }
-    updateColors("area")
+    updateParametersScaling("area")
     let selecttest = d3.select('p')
         .append('select')
         .attr('class','select')
@@ -207,7 +211,7 @@ Promise.all(promises).then(function(values) {
 
     function onchangefunc(d) {
         let selectValue = d3.select('select').property('value')
-        updateColors(selectValue)
+        updateParametersScaling(selectValue)
         d3.select('body')
             .append('p')
             .text(selectValue + ' is the last selected option.')
