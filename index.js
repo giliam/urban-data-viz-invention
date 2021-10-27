@@ -1,7 +1,7 @@
 // https://www.datavis.fr/index.php?page=map-population
 const width = 750, height = 750;
 const path = d3.geoPath();
-console.log("coucou")
+
 const projection = d3.geoConicConformal()
 .center([4.8312, 45.75])
 .scale(78000)
@@ -154,9 +154,6 @@ function addTooltip(param) {
 Promise.all(promises).then(function(values) {
     const geojson = values[0]; // Récupération de la première promesse : le contenu du fichier JSON
     const csv = values[1]; // Récupération de la deuxième promesse : le contenu du fichier csv
-
-    console.log(csv)
-    console.log(geojson)
 
     deps.selectAll("path")
         .data(geojson.features)
