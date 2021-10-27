@@ -1,0 +1,27 @@
+name_param,description_fr
+area,Aire (km$^2$)
+coeff_emprise_sol,Coefficient d'emprise au sol des bâtiments construits (CES)
+coeff_occu_sol,Coefficient d'occupation des sols (COS)
+aire_vegetalisee_pourc,Pourcentage d'aire végétalisée par rapport à l'aire de la zone
+pourc_aire_route,Proportion d'aire de route par rapport à la surface de la zone
+n_parcelles,Nombre de parcelles
+ecole,Ecoles du secondaire
+collegelycee,Collèges et lycées
+som_refroid_arbres,Pouvoir refroidissant des arbres
+som_impermeabilite,Imperméabilité (%)
+aire_moyenne_ilots,Aire moyenne des îlots (m²)
+avg_hauteur,Hauteur moyenne des bâtiments
+avg_width,Largeur moyenne des bâtiments
+avg_height,Longueur moyenne des bâtiments
+prop_bati_tertiaire,Proportion de bâtiments dédié au secteur tertiaire
+prop_perio_constr_generale_better,Estimation de l'année moyenne de construction
+prop_perio_constr_avant_1919,Proportion de bâtiments construits avant 1919
+prop_perio_constr_1971_1990,Proportion de bâtiments construits entre 1971 et 1990
+prop_perio_constr_1946_1970,Proportion de bâtiments construits entre 1946 et 1970
+rp_cccoll_sur_resprin,% de chauffage central collectif parmi les résidences principales
+rp_garl_sur_menages,% de menages disposant d'un emplacement de stationnement
+rp_voit1p_sur_menages,% de menages ayant une voiture ou plus
+rp_voit1p_sur_menages,% de menages ayant une voiture ou plus
+population,Population
+prop_bati_residentiel,Proportion de bâtiments dédié au secteur residentiel
+prop_bati_industriel,Proportion de bâtiments dédié au secteur industriel
