@@ -16,7 +16,7 @@ const svg = d3.select('#map').append("svg")
 
 const deps = svg.append("g");
 
-let div = d3.select("body").append("div")   
+let div = d3.select("#mainsection").append("div")   
     .attr("class", "tooltip")               
     .style("opacity", 0);
 
@@ -299,6 +299,7 @@ Promise.all(promises).then(function(values) {
         
     let colormaps = d3.select("p").append("select")
         .attr("id", "colormapselection")
+        .attr('class','select')
         .on('change', onChangeColorMap)
     let optionsColorMaps = colormaps
         .selectAll('option')
