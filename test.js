@@ -54,40 +54,69 @@ promises.push(d3.tsv('csv/lyon.csv',
                         prop_bati_industriel: +d.prop_bati_industriel,
                     }; })
                     );
-const colors = ['#d4eac7', '#c6e3b5', '#b7dda2', '#a9d68f', '#9bcf7d', '#8cc86a', '#7ec157', '#77be4e', '#70ba45', '#65a83e', '#599537', '#4e8230', '#437029',     '#385d22', '#2d4a1c', '#223815'], 
-    legendCellSize = 20
-;
+const legendCellSize = 20, legendNbCells = 15;
+const legendPositionWidth = width*0.85, legendPositionHeight = (height-legendNbCells*legendCellSize)/2;
 
 const parameters = ["area", "coeff_emprise_sol", "coeff_occu_sol", "aire_vegetalisee_pourc", "pourc_aire_route", "n_parcelles", "ecole", "collegelycee", "som_refroid_arbres", "som_impermeabilite", "aire_moyenne_ilots", "avg_hauteur", "avg_width", "avg_height", "prop_bati_tertiaire", "prop_perio_constr_generale_better", "prop_perio_constr_avant_1919", "prop_perio_constr_1971_1990", "prop_perio_constr_1946_1970", "rp_cccoll_sur_resprin", "rp_garl_sur_menages", "rp_voit1p_sur_menages", "rp_voit1p_sur_menages", "population", "prop_bati_residentiel", "prop_bati_industriel"]
 
-var data = ["Option 1", "Option 2", "Option 3"];
-
-function getColorIndex(color) {
-    for (var i = 0; i < colors.length; i++) {
-        if (colors[i] === color) {
-            return i;
-        }
-    }
-    return -1;
+const parametersProperties = {
+    "area": {"name": "Aire (km$^2$)", "factor": 1/1000/1000},
+    "coeff_emprise_sol": {"name": "Coefficient d'emprise au sol des bâtiments (CES)"},
+    "coeff_occu_sol": {"name": "Coefficient d'occupation des sols (COS)"},
+    "aire_vegetalisee_pourc": {"name": "Pourcentage d'aire végétalisée par rapport à l'aire de la zone", "factor": 100, "cmap": "Greens"},
+    "pourc_aire_route": {"name": "Proportion d'aire de route par rapport à la surface de la zone"},
+    "n_parcelles": {"name": "Nombre de parcelles"},
+    "ecole": {"name": "Ecoles du secondaire"},
+    "collegelycee": {"name": "Collèges et lycées"},
+    "som_refroid_arbres": {"name": "Pouvoir refroidissant des arbres"},
+    "som_impermeabilite": {"name": "Imperméabilité (%)"},
+    "aire_moyenne_ilots": {"name": "Aire moyenne des îlots (m²)"},
+    "avg_hauteur": {"name": "Hauteur moyenne des bâtiments"},
+    "avg_width": {"name": "Largeur moyenne des bâtiments"},
+    "avg_height": {"name": "Longueur moyenne des bâtiments"},
+    "prop_bati_tertiaire": {"name": "Proportion de bâtiments dédié au secteur tertiaire"},
+    "prop_perio_constr_generale_better": {"name": "Estimation de l'année moyenne de construction"},
+    "prop_perio_constr_avant_1919": {"name": "Proportion de bâtiments construits avant 1919"},
+    "prop_perio_constr_1971_1990": {"name": "Proportion de bâtiments construits entre 1971 et 1990"},
+    "prop_perio_constr_1946_1970": {"name": "Proportion de bâtiments construits entre 1946 et 1970"},
+    "rp_cccoll_sur_resprin": {"name": "% de chauffage central collectif parmi les résidences principales"},
+    "rp_garl_sur_menages": {"name": "% de menages disposant d'un emplacement de stationnement"},
+    "rp_voit1p_sur_menages": {"name": "% de menages ayant une voiture ou plus"},
+    "rp_voit1p_sur_menages": {"name": "% de menages ayant une voiture ou plus"},
+    "population": {"name": "Population"},
+    "prop_bati_residentiel": {"name": "Proportion de bâtiments dédié au secteur residentiel"},
+    "prop_bati_industriel": {"name": "Proportion de bâtiments dédié au secteur industriel"}
 }
 
-function addTooltip() {
+const authorizedColorMaps = ["Blues", "BrBG", "BuGn", "BuPu", "Cividis", "Cool", "CubehelixDefault", "GnBu", "Greens", "Greys", "Inferno", "Magma", "OrRd", "Oranges", "PRGn", "PiYG", "Plasma", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "Rainbow", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds",  "Sinebow", "Spectral",  "Turbo", "Viridis", "Warm", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd"]
+
+var data = ["Option 1", "Option 2", "Option 3"];
+
+function getLocationColor(value, min, max) {
+    return legendNbCells*(value-min)/(max-min);
+}
+
+function addTooltip(param) {
+    let paramName = parametersProperties[param].name;
+    let tooltipWidth = paramName.length * 8, tooltipHeight = 60;
+    tooltipWidth = (tooltipWidth< 300) ? 300 : tooltipWidth;
     var tooltip = svg.append("g") // Group for the whole tooltip
         .attr("id", "tooltip")
+        .attr("class", "legendelements")
         .style("display", "none");
     
     tooltip.append("polyline") // The rectangle containing the text, it is 210px width and 60 height
-        .attr("points","0,0 210,0 210,60 0,60 0,0")
-        .style("fill", "#222b1d")
+        .attr("points","0,0 " + tooltipWidth + ",0 " + tooltipWidth + "," + tooltipHeight + " 0," + tooltipHeight + " 0,0")
+        .style("fill", "#02011b")
         .style("stroke","black")
         .style("opacity","0.9")
         .style("stroke-width","1")
         .style("padding", "1em");
     
     tooltip.append("line") // A line inserted between country name and score
-        .attr("x1", 40)
+        .attr("x1", 50)
         .attr("y1", 25)
-        .attr("x2", 160)
+        .attr("x2", tooltipWidth-50)
         .attr("y2", 25)
         .style("stroke","#929292")
         .style("stroke-width","0.5")
@@ -95,11 +124,11 @@ function addTooltip() {
     
     var text = tooltip.append("text") // Text that will contain all tspan (used for multilines)
         .style("font-size", "13px")
-        .style("fill", "#c1d3b8")
+        .style("fill", "#cbceda")
         .attr("transform", "translate(0, 20)");
     
     text.append("tspan") // Country name udpated by its id
-        .attr("x", 105) // ie, tooltip width / 2
+        .attr("x", tooltipWidth/2) // ie, tooltip width / 2
         .attr("y", 0)
         .attr("id", "tooltip-country")
         .attr("text-anchor", "middle")
@@ -107,15 +136,15 @@ function addTooltip() {
         .style("font-size", "16px");
     
     text.append("tspan") // Fixed text
-        .attr("x", 105) // ie, tooltip width / 2
-        .attr("y", 30)
+        .attr("x", tooltipWidth/2) // ie, tooltip width / 2
+        .attr("y", tooltipHeight/2)
         .attr("text-anchor", "middle")
         .style("fill", "929292")
-        .text("Surface : ");
+        .text(paramName + " : ");
     
     text.append("tspan") // Score udpated by its id
-        .attr("id", "tooltip-score")
-        .style("fill","#c1d3b8")
+        .attr("id", "tooltipdata")
+        .style("fill","#cbceda")
         .style("font-weight", "bold");
     
     
@@ -128,8 +157,6 @@ Promise.all(promises).then(function(values) {
 
     console.log(csv)
     console.log(geojson)
-    
-    var tooltip = addTooltip();
 
     deps.selectAll("path")
         .data(geojson.features)
@@ -139,22 +166,36 @@ Promise.all(promises).then(function(values) {
         .attr('id', d => "iris_" + d.properties.codeiris)
         .attr("d", path);
 
-    function updateParametersScaling(param){
-        const min = d3.min(csv, d =>  +d[param]),
-        max = d3.max(csv, d =>  +d[param]);
+    function updateParametersScaling(param, _colormap=false){
+        let paramProperties = parametersProperties[param];
+        let factor = (paramProperties.factor) ? paramProperties.factor : 1;
+        const min = d3.min(csv, d =>  +d[param]*factor),
+        max = d3.max(csv, d =>  +d[param]*factor);
         
-        let legendNbCells = 20;
-
+        let colormap = "";
+        if(!_colormap){
+            colormap = d3.interpolateViridis;
+        } else {
+            colormap = d3["interpolate"+_colormap] ? d3["interpolate"+_colormap] : d3.interpolateViridis;
+        }
         let quantile = d3.scaleSequential().domain([min, max])
-            .interpolator(d3.interpolatePuRd);
-        // let quantile = d3.scaleQuantile().domain([min, max])
-        //     .range(colors);
-
+            .interpolator(colormap);
+        
         svg.selectAll(".legendelements").remove()
+        let tooltip = addTooltip(param);
+        
         let legend = svg.append('g')
-            .attr('transform', 'translate(625, 150)')
-            .attr('id', 'legend')
-            .attr('class', 'legendelements');
+        .attr('transform', 'translate('+legendPositionWidth+', '+legendPositionHeight+')')
+        .attr('id', 'legend')
+        .attr('class', 'legendelements');
+
+        let cursor = legend.append('polyline')
+            // .attr('transform', 'translate('+legendPositionWidth+', '+legendPositionHeight+')')
+            .attr("points", "0," + -legendCellSize/2 + " 0," + legendCellSize/2 + " " + (legendCellSize * 0.8) + ",0" )
+            .attr("id", "cursor")
+            .attr('class', 'legendelements')
+            .style("display", "none")
+            .style('fill', "rgb(150, 150, 150)");
 
         let legendStep = (max-min)/legendNbCells
         legend.selectAll('.colorbar')
@@ -165,9 +206,24 @@ Promise.all(promises).then(function(values) {
                 .attr('width', '20px')
                 .attr('x', '0px')
                 // .attr("class", d => "q" + d + "-9")
+                .attr("id", d => "legendCell"+(d-min)/legendStep)
                 .style("fill", d => quantile(d))
                 .style("stroke-width", "0.25px")
                 .style("stroke", "rgb(0,0,0)")
+            .on("mouseover", function(d) {
+                // let n = d.target.id.slice("legendCell".length)
+                // legend.select("#cursor")
+                //     .attr('transform','translate(' + (-legendCellSize-5) + ', ' + (n*legendCellSize+legendCellSize*0.5) + ')')
+                //     .style("display", null);
+                // d3.selectAll("path[customcolor='" + d.target.style.fill + "']")
+                //     .style('fill', "#9966cc");
+            })
+            .on("mouseout", function(d) {
+                // legend.select("#cursor")
+                //     .style("display", "none");
+                // d3.selectAll("path[customcolor='" + d.target.style.fill + "']")
+                //     .style('fill', d.target.style.fill);
+            })
         ;
 
         let legendScale = d3.scaleLinear()
@@ -176,21 +232,26 @@ Promise.all(promises).then(function(values) {
 
         legendAxis = svg.append("g")
             .attr('class', 'legendelements')
-            .attr('transform', 'translate('+(legendCellSize+625)+', 150)')
+            .attr('transform', 'translate('+(legendCellSize+legendPositionWidth)+', '+legendPositionHeight+')')
             .call(d3.axisRight(legendScale));
 
         csv.forEach(function(e,i) {
             d3.select("#iris_" + e.codeiris)
-                .style("fill", quantile(e[param]))
+                .style("fill", quantile(e[param]*factor))
+                .attr("customcolor", quantile(e[param]*factor))
                 // .attr("class", d => "iris_q" + quantile(e.area) + "-9")
                 .on("mouseover", function(d) {
                     tooltip.style("display", null);
                     tooltip.select('#tooltip-country')
                         .text(e.codeiris);
-                    tooltip.select('#tooltip-score')
-                        .text(e[param]);
+                    tooltip.select('#tooltipdata')
+                        .text((e[param]*factor).toLocaleString(
+                            "fr-FR", // leave undefined to use the visitor's browser 
+                                       // locale or a string like 'en-US' to override it.
+                            { minimumFractionDigits: 2 }
+                          ));
                     legend.select("#cursor")
-                        .attr('transform', 'translate(' + (legendCellSize + 5) + ', ' + (getColorIndex(quantile(+e[param])) * legendCellSize) + ')')
+                        .attr('transform', 'translate(' + (-legendCellSize-5) + ', ' + (getLocationColor(e[param]*factor, min, max) * legendCellSize) + ')')
                         .style("display", null);
                 })
                 .on("mouseout", function(d) {
@@ -199,31 +260,55 @@ Promise.all(promises).then(function(values) {
                 })
                 .on("mousemove", function(d) {
                     var mouse = d3.pointer(d);
-                    tooltip.attr("transform", "translate(" + mouse[0] + "," + (mouse[1] - 75) + ")");
+                    // tooltip.attr("transform", "translate(" + mouse[0] + "," + (mouse[1] - 75) + ")");
                 });
         });
     }
     updateParametersScaling("area")
-    let selecttest = d3.select('p')
+    let select = d3.select('p')
         .append('select')
         .attr('class','select')
-        .on('change', onchangefunc)
+        .attr('id','paramSelection')
+        .on('change', onChangeParameter)
 
-    function onchangefunc(d) {
-        let selectValue = d3.select('select').property('value')
-        updateParametersScaling(selectValue)
-        d3.select('body')
-            .append('p')
-            .text(selectValue + ' is the last selected option.')
-    };
+    function onChangeParameter() {
+        let param = d3.select('#paramSelection').property('value')
+        let paramProperties = parametersProperties[param];
 
-    let optionstest = selecttest
+        let colormap = ""
+        if(paramProperties.cmap){
+            d3.select('#colormapselection').property('value', paramProperties.cmap)
+            colormap = paramProperties.cmap
+        }else{
+            colormap = d3.select('#colormapselection').property('value')            
+        }
+        updateParametersScaling(param, colormap)
+    }
+
+    function onChangeColorMap() {
+        let param = d3.select('#paramSelection').property('value')
+        let colorMapValue = d3.select('#colormapselection').property('value')
+        updateParametersScaling(param, colorMapValue)
+    }
+
+    let options = select
         .selectAll('option')
         .data(parameters).enter()
         .append('option')
         .text(function (d) { return d; })
         // .values(function (d) { return d; })
     ;
+
+        
+    let colormaps = d3.select("p").append("select")
+        .attr("id", "colormapselection")
+        .on('change', onChangeColorMap)
+    let optionsColorMaps = colormaps
+        .selectAll('option')
+        .data(authorizedColorMaps).enter()
+        .append('option')    
+        .text(function (d) { return d; })
+
 });
 
 
